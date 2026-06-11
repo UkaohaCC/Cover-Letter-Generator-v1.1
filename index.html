@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover Letter Gen</title>
+
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      font-size: 16px;
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header h1 { font-size: 28px; font-weight: 600; margin-bottom: 6px; }
+    header p { color: #555; font-size: 15px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0d8;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .apikey-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .apikey-header h3 { font-size: 15px; font-weight: 600; }
+
+    .apikey-saved-badge {
+      display: none;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f0faf2;
+      color: #4a9c59;
+      border: 1px solid #c3e6cb;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .apikey-saved-badge.visible { display: inline-block; }
+
+    .apikey-input-row { display: flex; gap: 8px; align-items: center; }
+
+    .apikey-input-wrap {
+      flex: 1;
+      display: flex;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fafaf8;
+      transition: border-color 0.2s;
+    }
+
+    .apikey-input-wrap:focus-within { border-color: #888; background: #fff; }
+
+    #apikey-input {
+      flex: 1;
+      border: none;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1a1a1a;
+      background: transparent;
+      outline: none;
+    }
+
+    #apikey-toggle {
+      background: transparent;
+      border: none;
+      border-left: 1px solid #eee;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #888;
+    }
+
+    #apikey-toggle:hover { background: #f5f5f0; }
+
+    .apikey-hint { font-size: 12px; color: #aaa; margin-top: 8px; }
+    .apikey-hint a { color: #888; text-decoration: underline; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1a1a1a;
+      background: #fafaf8;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: #888;
+      background: #fff;
+    }
+
+    textarea { resize: vertical; line-height: 1.6; }
+
+    .char-count { font-size: 12px; color: #bbb; text-align: right; }
+
+    .button-group { display: flex; gap: 10px; margin-top: 1rem; }
+
+    button {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      font-family: inherit;
+      transition: opacity 0.15s, background 0.15s;
+    }
+
+    #generate-btn {
+      background: #1a1a1a;
+      color: #fff;
+      flex: 1;
+    }
+
+    #generate-btn:hover { opacity: 0.85; }
+    #generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #clear-btn {
+      background: transparent;
+      color: #555;
+      border-color: #ddd;
+    }
+
+    #clear-btn:hover { background: #f5f5f0; }
+
+    #apikey-save-btn {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    #apikey-save-btn:hover { opacity: 0.85; }
+
+    #apikey-remove-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid #f5c6c2;
+      color: #c0392b;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    #apikey-remove-btn:hover { background: #fff5f5; }
+    #apikey-remove-btn.visible { display: inline-block; }
+
+    .result-section { display: none; flex-direction: column; gap: 1rem; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-header h3 { font-size: 16px; font-weight: 600; }
+
+    .result-actions { display: flex; gap: 8px; }
+
+    .action-btn {
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      border: 1px solid #ddd;
+      background: transparent;
+      color: #444;
+      transition: background 0.15s;
+    }
+
+    .action-btn:hover { background: #f5f5f0; }
+
+    .action-btn.primary {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    .action-btn.primary:hover { opacity: 0.85; }
+
+    .action-btn.copied {
+      background: #f0faf2;
+      color: #4a9c59;
+      border-color: #c3e6cb;
+    }
+
+    #cover-letter-output {
+      width: 100%;
+      min-height: 320px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.8;
+      color: #1a1a1a;
+      background: #fafaf8;
+      resize: vertical;
+      outline: none;
+    }
+
+    #cover-letter-output:focus { border-color: #888; background: #fff; }
+
+    .tone-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tone-row label { font-size: 14px; font-weight: 500; color: #333; white-space: nowrap; }
+
+    .tone-options { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .tone-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: transparent;
+      color: #666;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .tone-btn.active {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
+
+    .history-section { display: none; }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .history-header h3 { font-size: 16px; font-weight: 600; }
+
+    #clear-history-btn {
+      font-size: 13px;
+      padding: 5px 12px;
+      color: #c0392b;
+      background: transparent;
+      border: 1px solid #f5c6c2;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    #clear-history-btn:hover { background: #fff5f5; }
+
+    #history-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border: 1px solid #e0e0d8;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      gap: 12px;
+    }
+
+    .history-item:hover { background: #fafaf8; }
+
+    .history-item-info { flex: 1; min-width: 0; }
+
+    .history-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-meta { font-size: 12px; color: #999; margin-top: 2px; }
+
+    .history-delete-btn {
+      font-size: 13px;
+      color: #bbb;
+      background: transparent;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+
+    .history-delete-btn:hover { color: #c0392b; background: #fff5f5; }
+
+    .history-empty { text-align: center; font-size: 14px; color: #bbb; padding: 1rem 0; }
+
+    footer { text-align: center; font-size: 13px; color: #aaa; padding-top: 0.5rem; }
+
+    @media (max-width: 540px) {
+      body { padding: 1rem 0.75rem; }
+      header h1 { font-size: 22px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .button-group { flex-direction: column; }
+      .result-actions { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <h1>Cover Letter Generator</h1>
+      <p>Enter your details and the job, get a tailored cover letter in seconds.</p>
+    </header>
+
+    <section class="card">
+      <div class="apikey-header">
+        <h3>Gemini API Key</h3>
+        <span class="apikey-saved-badge" id="apikey-saved-badge">✓ Key saved</span>
+      </div>
+      <div class="apikey-input-row">
+        <div class="apikey-input-wrap">
+          <input type="password" id="apikey-input" placeholder="Paste your Gemini API key here..." autocomplete="off" spellcheck="false" />
+          <button id="apikey-toggle" title="Show / hide key">👁</button>
+        </div>
+        <button id="apikey-save-btn">Save</button>
+        <button id="apikey-remove-btn" title="Remove saved key">Remove</button>
+      </div>
+      <p class="apikey-hint">
+        Stored in your browser only, never exposed in code...
+        Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>.
+      </p>
+    </section>
+
+    <section class="card">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="user-name">Your Full Name</label>
+          <input type="text" id="user-name" placeholder="e.g. John Adeyemi" />
+        </div>
+
+        <div class="field">
+          <label for="company-name">Company Name</label>
+          <input type="text" id="company-name" placeholder="e.g. Google" />
+        </div>
+
+        <div class="field full">
+          <label for="user-skills">Your Skills & Experience</label>
+          <textarea id="user-skills" rows="4" placeholder="e.g. 3 years of experience in frontend development, proficient in React, CSS, JavaScript. Built 5 production apps. Strong communicator."></textarea>
+        </div>
+
+        <div class="field full">
+          <label for="job-description">Job Description</label>
+          <textarea id="job-description" rows="6" placeholder="Paste the full job description here..."></textarea>
+          <div class="char-count"><span id="char-number">0</span> characters</div>
+        </div>
+
+      </div>
+
+      <div class="tone-row">
+        <label>Tone:</label>
+        <div class="tone-options">
+          <button class="tone-btn active" data-tone="professional">Professional</button>
+          <button class="tone-btn" data-tone="confident">Confident</button>
+          <button class="tone-btn" data-tone="friendly">Friendly</button>
+          <button class="tone-btn" data-tone="formal">Formal</button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button id="generate-btn">Generate Cover Letter</button>
+        <button id="clear-btn">Clear</button>
+      </div>
+
+    </section>
+
+    <section class="result-section" id="result-section">
+      <div class="card">
+        <div class="result-header">
+          <h3>Your Cover Letter</h3>
+          <div class="result-actions">
+            <button class="action-btn" id="regenerate-btn">Regenerate</button>
+            <button class="action-btn primary" id="copy-btn">Copy</button>
+          </div>
+        </div>
+        <textarea id="cover-letter-output" readonly></textarea>
+      </div>
+    </section>
+
+    <section class="card history-section" id="history-section">
+      <div class="history-header">
+        <h3>Recent Letters</h3>
+        <button id="clear-history-btn">Clear all</button>
+      </div>
+      <div id="history-list">
+        <p class="history-empty">No letters generated yet.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>AI-generated letters... always review before sending. CCU2026</p>
+    </footer>
+
+  </div>
+
+  <script>
+    const KEY_STORAGE = 'cl_generator_gemini_key';
+
+    function getApiKey() {
+      return localStorage.getItem(KEY_STORAGE) || '';
+    }
+
+    document.getElementById('apikey-save-btn').addEventListener('click', function () {
+      const val = document.getElementById('apikey-input').value.trim();
+      if (!val) { alert('Please paste your API key first.'); return; }
+      localStorage.setItem(KEY_STORAGE, val);
+      updateKeyUI(true);
+    });
+
+    document.getElementById('apikey-remove-btn').addEventListener('click', function () {
+      if (confirm('Remove saved API key?')) {
+        localStorage.removeItem(KEY_STORAGE);
+        document.getElementById('apikey-input').value = '';
+        updateKeyUI(false);
+      }
+    });
+
+    document.getElementById('apikey-toggle').addEventListener('click', function () {
+      const input = document.getElementById('apikey-input');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      this.textContent = isHidden ? '🙈' : '👁';
+    });
+
+    function updateKeyUI(hasSavedKey) {
+      document.getElementById('apikey-saved-badge').classList.toggle('visible', hasSavedKey);
+      document.getElementById('apikey-remove-btn').classList.toggle('visible', hasSavedKey);
+      if (hasSavedKey) {
+        document.getElementById('apikey-input').value = '';
+        document.getElementById('apikey-input').placeholder = '●●●●●●●●●●●●●●●● (key saved)';
+      } else {
+        document.getElementById('apikey-input').placeholder = 'Paste your Gemini API key here...';
+      }
+    }
+
+    updateKeyUI(!!getApiKey());
+
+    let selectedTone = 'professional';
+
+    document.querySelectorAll('.tone-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.tone-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selectedTone = btn.dataset.tone;
+      });
+    });
+
+    document.getElementById('job-description').addEventListener('input', function () {
+      document.getElementById('char-number').textContent = this.value.length.toLocaleString();
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', function () {
+      document.getElementById('user-name').value = '';
+      document.getElementById('company-name').value = '';
+      document.getElementById('user-skills').value = '';
+      document.getElementById('job-description').value = '';
+      document.getElementById('char-number').textContent = '0';
+      document.getElementById('result-section').style.display = 'none';
+    });
+
+    document.getElementById('generate-btn').addEventListener('click', function () {
+      generateLetter();
+    });
+
+    document.getElementById('regenerate-btn').addEventListener('click', function () {
+      generateLetter();
+    });
+
+    async function generateLetter() {
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        alert('Please enter and save your Gemini API key first.\nGet a free key at: https://aistudio.google.com/app/apikey');
+        document.getElementById('apikey-input').focus();
+        return;
+      }
+
+      const name        = document.getElementById('user-name').value.trim();
+      const company     = document.getElementById('company-name').value.trim();
+      const skills      = document.getElementById('user-skills').value.trim();
+      const jobDesc     = document.getElementById('job-description').value.trim();
+
+      if (!name)    { alert('Please enter your name.'); return; }
+      if (!company) { alert('Please enter the company name.'); return; }
+      if (!skills)  { alert('Please enter your skills and experience.'); return; }
+      if (!jobDesc) { alert('Please paste the job description.'); return; }
+
+      setLoading(true);
+
+      const letter = await callGemini(name, company, skills, jobDesc, selectedTone, apiKey);
+
+      setLoading(false);
+
+      if (letter) {
+        document.getElementById('cover-letter-output').value = letter;
+        document.getElementById('result-section').style.display = 'flex';
+        document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        saveToHistory(name, company, letter);
+      }
+    }
+
+    async function callGemini(name, company, skills, jobDesc, tone, apiKey) {
+      const prompt = `Write a ${tone} cover letter for a job application.
+
+Applicant name: ${name}
+Company: ${company}
+Applicant skills and experience: ${skills}
+Job description: ${jobDesc.slice(0, 3000)}
+
+Instructions:
+- Address it to the hiring manager
+- Keep it to 3-4 short paragraphs
+- Match the applicant skills directly to the job requirements
+- Tone must be ${tone}
+- Do not include a subject line
+- End with a confident closing
+- Return only the cover letter text, nothing else`;
+
+      try {
+        const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=' + apiKey;
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1024
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err?.error?.message || 'API error ' + response.status);
+        }
+
+        const data = await response.json();
+        return data.candidates[0].content.parts[0].text.trim();
+
+      } catch (err) {
+        alert('⚠️ Generation failed: ' + err.message);
+        return null;
+      }
+    }
+
+    document.getElementById('copy-btn').addEventListener('click', function () {
+      const text = document.getElementById('cover-letter-output').value;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(function () {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+
+    function setLoading(isLoading) {
+      const btn = document.getElementById('generate-btn');
+      btn.disabled = isLoading;
+      btn.textContent = isLoading ? 'Generating...' : 'Generate Cover Letter';
+    }
+
+    const HISTORY_KEY = 'cl_generator_history';
+
+    function loadHistory() {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+
+    function saveToHistory(name, company, letter) {
+      const history = loadHistory();
+
+      const entry = {
+        id:      Date.now(),
+        title:   name + ' → ' + company,
+        date:    new Date().toLocaleDateString(),
+        letter:  letter
+      };
+
+      history.unshift(entry);
+      if (history.length > 20) history.pop();
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = loadHistory();
+      const section = document.getElementById('history-section');
+      const list    = document.getElementById('history-list');
+
+      if (history.length === 0) {
+        section.style.display = 'none';
+        list.innerHTML = '<p class="history-empty">No letters generated yet.</p>';
+        return;
+      }
+
+      section.style.display = 'block';
+      list.innerHTML = '';
+
+      history.forEach(function (entry) {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+          <div class="history-item-info">
+            <div class="history-item-title">${entry.title}</div>
+            <div class="history-item-meta">${entry.date}</div>
+          </div>
+          <button class="history-delete-btn" data-id="${entry.id}">✕</button>
+        `;
+
+        item.addEventListener('click', function (e) {
+          if (e.target.classList.contains('history-delete-btn')) return;
+          document.getElementById('cover-letter-output').value = entry.letter;
+          document.getElementById('result-section').style.display = 'flex';
+          document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        item.querySelector('.history-delete-btn').addEventListener('click', function (e) {
+          e.stopPropagation();
+          let history = loadHistory();
+          history = history.filter(function (h) { return h.id !== entry.id; });
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+          renderHistory();
+        });
+
+        list.appendChild(item);
+      });
+    }
+
+    document.getElementById('clear-history-btn').addEventListener('click', function () {
+      if (confirm('Clear all history?')) {
+        localStorage.removeItem(HISTORY_KEY);
+        renderHistory();
+      }
+    });
+
+    renderHistory();
+  </script>
+
+</body>
+</html>
