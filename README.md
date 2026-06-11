@@ -88,8 +88,8 @@ No frameworks. No build tools. No dependencies.
 
 ## License
 
-MIT License — free to use, modify, and share.
+MIT License  ...free to use, modify, and share.
 
 ---
 
-Built by Me using HTML, CSS, JavaScript, and the Google Gemini API.
+Built by Me using HTML, CSS, JavaScript, and the Google Gemini API. 11TH JUNE, 2026.
